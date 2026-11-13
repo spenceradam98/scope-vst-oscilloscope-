@@ -1,4 +1,16 @@
 cmake_minimum_required(VERSION 3.22)
+
+# macOS: run on older Macs (Adam's 2015 Intel MacBook Pro on macOS 11) and on
+# Apple Silicon, from one universal binary. Must be set before project().
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum macOS version")
+if(NOT DEFINED CMAKE_OSX_ARCHITECTURES)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "macOS architectures")
+endif()
+
+# Windows: link the C++ runtime statically so users don't need a
+# Visual C++ Redistributable installed.
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 project(SCOPE VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)

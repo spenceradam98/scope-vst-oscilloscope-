@@ -27,6 +27,24 @@ Mouse: wheel on the scope changes timebase, right-click the scope or spectrum
 for options (trigger, tilt, range, release, peak hold), click the meters to
 reset peaks.
 
+## Installers (Mac and Windows)
+
+Every push to GitHub builds both installers in GitHub Actions
+(`.github/workflows/build.yml`). Download them from the run's
+**Artifacts**, or push a tag like `v0.1.0` to publish them on a Release page.
+
+| File | Who it's for | What it installs |
+|---|---|---|
+| `Scope-<ver>-mac.dmg` | Mac, macOS 10.15+ (incl. Big Sur on 2015 Intel MacBook Pro), Intel and Apple Silicon | `.pkg` installer: VST3, AU, Standalone app |
+| `Scope-<ver>-windows-setup.exe` | Windows 10/11, 64-bit | VST3 into `C:\Program Files\Common Files\VST3`, optional Standalone app |
+
+The builds aren't code-signed yet, so first-time users see a warning:
+Mac: right-click the .pkg and choose **Open**. Windows: **More info → Run
+anyway**. Signing (Apple Developer ID + notarisation, Windows code-signing
+certificate) is on the v1.0 milestone.
+
+Packaging scripts live in `packaging/mac` and `packaging/windows` (Inno Setup).
+
 ## Build
 
 ```sh

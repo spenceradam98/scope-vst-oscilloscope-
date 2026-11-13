@@ -1,0 +1,8 @@
+This installs Scope, an oscilloscope and analyser plugin:
+
+  - VST3 plugin   -> /Library/Audio/Plug-Ins/VST3
+  - Audio Unit    -> /Library/Audio/Plug-Ins/Components
+  - Standalone    -> /Applications
+
+After installing, restart your DAW (or rescan plugins) and look for "Scope"
+under the effects from YourBrand.

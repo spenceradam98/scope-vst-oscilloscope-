@@ -1,0 +1,75 @@
+name: Build installers
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  mac:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure (universal, macOS 10.15+)
+        run: cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
+      - name: Build
+        run: cmake --build build --config Release --target Scope_VST3 Scope_AU Scope_Standalone -- -quiet
+      - name: Check binaries
+        run: |
+          ART=build/Scope_artefacts/Release
+          lipo -info "$ART/VST3/Scope.vst3/Contents/MacOS/Scope"
+          otool -l "$ART/VST3/Scope.vst3/Contents/MacOS/Scope" | grep -A3 -E "LC_BUILD_VERSION|LC_VERSION_MIN" | head -8
+      - name: Ad-hoc sign bundles
+        run: |
+          ART=build/Scope_artefacts/Release
+          for b in "$ART/VST3/Scope.vst3" "$ART/AU/Scope.component" "$ART/Standalone/Scope.app"; do
+            codesign --force --deep --sign - "$b"
+          done
+      - name: Make .dmg installer
+        run: packaging/mac/make_installer.sh build/Scope_artefacts/Release "$(grep -m1 -oE 'VERSION [0-9.]+' CMakeLists.txt | cut -d' ' -f2)" dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Scope-mac
+          path: dist/*.dmg
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64
+      - name: Build
+        run: cmake --build build --config Release --target Scope_VST3 Scope_Standalone
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+      - name: Make Setup.exe
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path CMakeLists.txt -Pattern 'VERSION ([0-9.]+)' | Select-Object -First 1).Matches[0].Groups[1].Value
+          $art = Resolve-Path build/Scope_artefacts/Release
+          New-Item -ItemType Directory -Force dist | Out-Null
+          $out = Resolve-Path dist
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" "/DArtefacts=$art" "/DOutDir=$out" packaging/windows/Scope.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Scope-windows
+          path: dist/*.exe
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [mac, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

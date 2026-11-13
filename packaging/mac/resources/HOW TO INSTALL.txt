@@ -1,0 +1,16 @@
+HOW TO INSTALL SCOPE (Mac)
+
+1. Double-click "Scope-Installer.pkg".
+
+2. If macOS says it "can't be opened because it is from an unidentified
+   developer": close that message, then RIGHT-CLICK (or Control-click) the
+   .pkg and choose "Open", then "Open" again.
+   (This happens because this test build isn't signed with an Apple
+   Developer certificate yet.)
+
+3. Click through the installer. You can untick parts you don't want.
+
+4. Restart your DAW or rescan plugins. Scope appears as an effect.
+   Logic/GarageBand use the Audio Unit; most other DAWs use the VST3.
+
+Works on macOS 10.15 (Catalina) or newer, including macOS 11 Big Sur,, Intel and Apple Silicon Macs.

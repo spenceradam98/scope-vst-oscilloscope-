@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>Scope @VERSION@</title>
+    <welcome file="welcome.txt"/>
+    <options customize="allow" require-scripts="false" hostArchitectures="x86_64,arm64"/>
+    <domains enable_localSystem="true"/>
+    <volume-check>
+        <allowed-os-versions><os-version min="10.15"/></allowed-os-versions>
+    </volume-check>
+    <choices-outline>
+        <line choice="vst3"/>
+        <line choice="au"/>
+        <line choice="app"/>
+    </choices-outline>
+    <choice id="vst3" title="VST3 plugin" description="For Ableton Live, FL Studio, Cubase, Reaper, Studio One and most other DAWs.">
+        <pkg-ref id="com.yourbrand.scope.vst3"/>
+    </choice>
+    <choice id="au" title="Audio Unit plugin" description="For Logic Pro, GarageBand and MainStage.">
+        <pkg-ref id="com.yourbrand.scope.au"/>
+    </choice>
+    <choice id="app" title="Standalone app" description="Run Scope without a DAW, using your audio interface input.">
+        <pkg-ref id="com.yourbrand.scope.app"/>
+    </choice>
+    <pkg-ref id="com.yourbrand.scope.vst3" version="@VERSION@">Scope-vst3.pkg</pkg-ref>
+    <pkg-ref id="com.yourbrand.scope.au" version="@VERSION@">Scope-au.pkg</pkg-ref>
+    <pkg-ref id="com.yourbrand.scope.app" version="@VERSION@">Scope-app.pkg</pkg-ref>
+</installer-gui-script>
