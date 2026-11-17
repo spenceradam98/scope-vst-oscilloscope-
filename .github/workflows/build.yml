@@ -9,13 +9,25 @@ on:
 
 jobs:
   mac:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Configure (universal, macOS 10.15+)
         run: cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
       - name: Build
         run: cmake --build build --config Release --target Scope_VST3 Scope_AU Scope_Standalone -- -quiet
+      - name: Verify binaries run on macOS 11 (universal, minos <= 11.0)
+        run: |
+          fail=0
+          while IFS= read -r -d '' f; do
+            minos=$(otool -arch all -l "$f" | awk '/LC_BUILD_VERSION/{m=1} /LC_VERSION_MIN_MACOSX/{v=1} m&&$1=="minos"{print $2; m=0} v&&$1=="version"{print $2; v=0}' | sort -V | tail -1)
+            archs=$(lipo -archs "$f")
+            echo "$f -> minos $minos, archs $archs"
+            [ -n "$minos" ] && [ "$(printf '%s\n11.0\n' "$minos" | sort -V | tail -1)" = "11.0" ] || { echo "::error::$f needs macOS $minos"; fail=1; }
+            case " $archs " in *x86_64*) ;; *) echo "::error::$f has no Intel slice"; fail=1;; esac
+            case " $archs " in *arm64*) ;; *) echo "::error::$f has no Apple Silicon slice"; fail=1;; esac
+          done < <(find build -path '*_artefacts/Release/*' -path '*/Contents/MacOS/*' -type f -print0)
+          exit $fail
       - name: Check binaries
         run: |
           ART=build/Scope_artefacts/Release
