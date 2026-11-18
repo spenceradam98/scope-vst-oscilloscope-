@@ -44,7 +44,7 @@ jobs:
             codesign --force --deep --sign - "$b"
           done
       - name: Make .dmg installer
-        run: packaging/mac/make_installer.sh build/Scope_artefacts/Release "$(grep -m1 -oE 'VERSION [0-9.]+' CMakeLists.txt | cut -d' ' -f2)" dist
+        run: packaging/mac/make_installer.sh build/Scope_artefacts/Release "$(grep -m1 -oE 'project\([^)]*VERSION [0-9.]+' CMakeLists.txt | grep -oE '[0-9.]+$')" dist
       - uses: actions/upload-artifact@v4
         with:
           name: Scope-mac
@@ -65,7 +65,7 @@ jobs:
       - name: Make Setup.exe
         shell: pwsh
         run: |
-          $version = (Select-String -Path CMakeLists.txt -Pattern 'VERSION ([0-9.]+)' | Select-Object -First 1).Matches[0].Groups[1].Value
+          $version = (Select-String -Path CMakeLists.txt -Pattern 'project\([^)]*VERSION ([0-9.]+)' | Select-Object -First 1).Matches[0].Groups[1].Value
           $art = Resolve-Path build/Scope_artefacts/Release
           New-Item -ItemType Directory -Force dist | Out-Null
           $out = Resolve-Path dist
